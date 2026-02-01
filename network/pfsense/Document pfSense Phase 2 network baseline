@@ -1,0 +1,105 @@
+# pfSense Lab Network Architecture – Phase 2 Baseline
+
+## Overview
+
+This document records the successful completion of **Phase 2 – Core Network Baseline** for my on‑premises enterprise lab built on Hyper‑V with pfSense acting as the single routing and security boundary.
+
+The goal of this phase was to establish a clean, reproducible, and interview‑defensible network foundation that mirrors real‑world enterprise firewall and segmentation practices.
+
+---
+
+## Design Principles
+
+* Single authoritative firewall and router (pfSense)
+* Explicit trust boundaries
+* Deterministic IP addressing
+* No reliance on Hyper‑V Default Switch
+* Snapshot‑driven, reversible changes
+* Designed for future VLAN segmentation, IDS/IPS, and hybrid cloud connectivity
+
+---
+
+## Hyper‑V Network Fabric
+
+### Virtual Switches
+
+| vSwitch Name  | Type     | Purpose                                   |
+| ------------- | -------- | ----------------------------------------- |
+| vSwitch‑WAN   | External | Upstream / Internet connectivity          |
+| vSwitch‑TRUNK | Internal | Layer‑2 trunk carrying all internal VLANs |
+
+Routing and security policy are **not** handled by Hyper‑V. All routing decisions occur on pfSense.
+
+---
+
+## pfSense Appliance
+
+* **Platform:** Hyper‑V Virtual Machine
+* **OS:** pfSense 2.8.1‑RELEASE (amd64)
+* **Role:** Edge firewall, router, NAT, DHCP authority
+
+### Interface Mapping
+
+| pfSense Interface | Hyper‑V NIC   | Addressing                     |
+| ----------------- | ------------- | ------------------------------ |
+| WAN (hn0)         | vSwitch‑WAN   | DHCP (192.168.4.0/22 upstream) |
+| LAN / TRUNK (hn1) | vSwitch‑TRUNK | 172.28.10.1/24                 |
+
+pfSense is the **only** device performing:
+
+* Routing
+* NAT
+* Firewall policy enforcement
+
+---
+
+## Current Network State (Phase 2 Complete)
+
+### LAN Baseline
+
+* **Subnet:** 172.28.10.0/24
+* **Gateway:** 172.28.10.1
+* **DHCP Scope:** Managed by pfSense
+* **Outbound NAT:** Automatic
+
+This subnet serves as the initial trusted network and trunk for future VLAN expansion.
+
+---
+
+## Validation Checks
+
+The following validations were successfully completed:
+
+* pfSense services started cleanly (DHCP, firewall, WebConfigurator)
+* LAN clients received DHCP leases
+* Successful ICMP connectivity to internet targets
+* DNS resolution confirmed
+
+---
+
+## Change Control & Checkpoints
+
+All changes were validated using Hyper‑V checkpoints:
+
+* Phase‑2.2 – WAN‑Only DHCP verified
+* Phase‑2.3 – Core networking complete
+* Phase‑2.4 – Network baseline (current)
+
+Configuration backups were exported from pfSense after baseline completion.
+
+---
+
+## Next Planned Phases
+
+* **Phase 3:** VLAN segmentation (Servers, DMZ, Management, Clients)
+* **Phase 4:** Firewall policy hardening and logging
+* **Phase 5:** IDS/IPS (Suricata)
+* **Phase 6:** Site‑to‑Site VPN to Azure
+
+Each phase will be documented with architecture decisions, configuration steps, and validation evidence.
+
+---
+
+## Notes
+
+This lab is intentionally designed to reflect enterprise operational practices rather than simplified home‑lab shortcuts. All future changes are made incrementally, documented, and reversible.
